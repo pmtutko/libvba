@@ -1,5 +1,6 @@
 Attribute VB_Name = "Lib_ListObjectSupport"
 Attribute VB_Description = "Variety of support functions operating on Excel ListObjects (tables)."
+'@Folder("Libraries")
 Option Explicit
 
 '~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,8 +33,8 @@ Attribute SaveListObjectFilters.VB_Description = "Detects any filters applied to
     With lo.AutoFilter
         filterRange = .Range.Address
         With .Filters
-            ReDim FilterCache(1 To .count, 1 To 3)
-            For ii = 1 To .count
+            ReDim FilterCache(1 To .Count, 1 To 3)
+            For ii = 1 To .Count
                 With .item(ii)
                     If .On Then
                         #If False Then           ' XL11 code
@@ -56,7 +57,7 @@ Attribute SaveListObjectFilters.VB_Description = "Detects any filters applied to
                                 FilterCache(ii, 1) = .Criteria1
                                 FilterCache(ii, 2) = .Operator
   
-                            Case Else            ' These are not correctly restored; 
+                            Case Else            ' These are not correctly restored;
                                                  ' there's someting in Criteria1 but
                                                  ' can't save it.
                                 FilterCache(ii, 2) = .Operator

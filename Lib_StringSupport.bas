@@ -1,5 +1,6 @@
 Attribute VB_Name = "Lib_StringSupport"
 Attribute VB_Description = "Variety of support functions operating on VBA Strings."
+'@Folder("Libraries")
 Option Explicit
 
 Public Function CleanString(ByVal inString As String) As String
@@ -19,14 +20,14 @@ Attribute CleanString.VB_Description = "Strips out ANY non-printable character a
     CleanString = outString
 End Function
 
-Public Sub CopyTextToClipboard(Text As String)
+Public Sub CopyTextToClipboard(text As String)
 Attribute CopyTextToClipboard.VB_Description = "Copies the given string parameter to the Windows clipboard."
     '--- from: https://stackoverflow.com/a/25336423/4717755
     'VBA Macro using late binding to copy text to clipboard.
     'By Justin Kay, 8/15/2014
     Dim MSForms_DataObject As Object
     Set MSForms_DataObject = CreateObject("new:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
-    MSForms_DataObject.SetText Text
+    MSForms_DataObject.SetText text
     MSForms_DataObject.PutInClipboard
     Set MSForms_DataObject = Nothing
 End Sub

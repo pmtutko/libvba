@@ -1,5 +1,6 @@
 Attribute VB_Name = "Lib_PerformanceSupport"
 Attribute VB_Description = "Methods to control disabling/enabling of the Application level screen updates. Supports call nesting and debug messaging, plus high precision timer calls."
+'@Folder("Libraries")
 Option Explicit
 
 '------------------------------------------------------------------------------
@@ -24,16 +25,22 @@ Private Type LargeInteger
     highpart As Long
 End Type
 
-Private Declare Function QueryPerformanceCounter Lib _
-                         "kernel32" (lpPerformanceCount As LargeInteger) As Long
-Private Declare Function QueryPerformanceFrequency Lib _
-                         "kernel32" (lpFrequency As LargeInteger) As Long
+#If VBA7 Then
+    Private Declare PtrSafe Function QueryPerformanceCounter Lib _
+                         "kernel32" (ByRef lpPerformanceCount As LargeInteger) As Long
+    Private Declare PtrSafe Function QueryPerformanceFrequency Lib _
+                         "kernel32" (ByRef lpFrequency As LargeInteger) As Long
+#Else
+    Private Declare Function QueryPerformanceCounter Lib _
+                         "kernel32" (ByRef lpPerformanceCount As LargeInteger) As Long
+    Private Declare Function QueryPerformanceFrequency Lib _
+                         "kernel32" (ByRef lpFrequency As LargeInteger) As Long
+#End If
 
 Private counterStart As LargeInteger
-Private counterEnd As LargeInteger
 Private crFrequency As Double
 
-Private Const TWO_32 = 4294967296#               ' = 256# * 256# * 256# * 256#
+Private Const TWO_32 As Double = 4294967296#               ' = 256# * 256# * 256# * 256#
 
 '==============================================================================
 ' Screen and Event Update Controls
@@ -51,8 +58,8 @@ Attribute ReportUpdateState.VB_Description = "Prints to the immediate window the
     Debug.Print "--DEBUG_MODE is currently " & DEBUG_MODE
 End Sub
 
-Public Sub DisableUpdates(Optional debugMsg As String = vbNullString, _
-                          Optional forceZero As Boolean = False)
+Public Sub DisableUpdates(Optional ByVal debugMsg As String = vbNullString, _
+                          Optional ByVal forceZero As Boolean = False)
 Attribute DisableUpdates.VB_Description = "Disables Application level updates and events and saves their initial state to be restored later. Supports nested calls. Displays debug messages according to the module-global DEBUG_MODE flag."
     With Application
         '--- capture previous state if this is the first time
@@ -81,8 +88,8 @@ Attribute DisableUpdates.VB_Description = "Disables Application level updates an
     End With
 End Sub
 
-Public Sub EnableUpdates(Optional debugMsg As String = vbNullString, _
-                         Optional forceZero As Boolean = False)
+Public Sub EnableUpdates(Optional ByVal debugMsg As String = vbNullString, _
+                         Optional ByVal forceZero As Boolean = False)
 Attribute EnableUpdates.VB_Description = "Restores Application level updates and events to their state, prior to the *first* DisableUpdates call. Supports nested calls. Displays debug messages according to the module-global DEBUG_MODE flag."
     With Application
         '--- countdown!
@@ -116,7 +123,7 @@ End Sub
 '==============================================================================
 ' Precision Timer Controls
 '
-Private Function LI2Double(lgInt As LargeInteger) As Double
+Private Function LI2Double(ByRef lgInt As LargeInteger) As Double
 Attribute LI2Double.VB_Description = "Converts LARGE_INTEGER to Double"
     '--- converts LARGE_INTEGER to Double
     Dim low As Double
@@ -147,6 +154,7 @@ Attribute TimeElapsed.VB_Description = "Returns the time elapsed since the call 
     End If
     Dim crStart As Double
     Dim crStop As Double
+    Static counterEnd As LargeInteger
     QueryPerformanceCounter counterEnd
     crStart = LI2Double(counterStart)
     crStop = LI2Double(counterEnd)

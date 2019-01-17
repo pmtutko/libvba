@@ -1,5 +1,6 @@
 Attribute VB_Name = "Lib_PivotTableSupport"
 Attribute VB_Description = "Variety of support functions operating on Excel Pivot Tables."
+'@Folder("Libraries")
 Option Explicit
 
 Public Function PivotFieldIsHidden(ByRef pTable As PivotTable, _
@@ -33,7 +34,7 @@ End Function
 Public Function PivotFieldIsRow(ByRef pTable As PivotTable, _
                                 ByVal ptFieldName As String) As Boolean
 Attribute PivotFieldIsRow.VB_Description = "Determines if the given field is displayed as a row field in the pivot table."
-    '--- Determines if the given field is displayed as a row field 
+    '--- Determines if the given field is displayed as a row field
     '    in the pivot table
     Dim field As PivotField
     PivotFieldIsRow = False
@@ -48,7 +49,7 @@ End Function
 Public Function PivotFieldIsColumn(ByRef pTable As PivotTable, _
                                    ByVal ptFieldName As String) As Boolean
 Attribute PivotFieldIsColumn.VB_Description = "Determines if the given field is displayed as a column field in the pivot table."
-    '--- Determines if the given field is displayed as a column field 
+    '--- Determines if the given field is displayed as a column field
     '    in the pivot table
     Dim field As PivotField
     PivotFieldIsColumn = False
@@ -82,7 +83,7 @@ End Function
 
 Public Function AnyPivotItemsExpanded(ByRef pField As PivotField) As Boolean
 Attribute AnyPivotItemsExpanded.VB_Description = "Determines if any displayed items in the pivot table have been expanded"
-    '--- Determines if any displayed items in the pivot table have 
+    '--- Determines if any displayed items in the pivot table have
     '    been expanded
     Dim pItem As PivotItem
     AnyPivotItemsExpanded = False
@@ -111,18 +112,18 @@ Attribute PivotItemExpanded.VB_Description = "Determines if the specific field i
 End Function
 
 Public Sub PivotSetShowDetail(ByRef pTable As PivotTable, _
-                              ByVal showFlag as Boolean)
+                              ByVal showFlag As Boolean)
 Attribute PivotSetShowDetail.VB_Description = "Expands or collapses all visible fields in the given pivot table."
     '--- Expands or collapses all visible fields in the given pivot table
     Dim rowField As PivotField
     For Each rowField In pTable.RowFields
-        If rowField.position <> pTable.RowFields.count Then
+        If rowField.position <> pTable.RowFields.Count Then
             rowField.ShowDetail = showFlag
         End If
     Next rowField
 End Sub
 
-public Function PivotItemsShown(pf As PivotField) As Boolean
+Public Function PivotItemsShown(pf As PivotField) As Boolean
 Attribute PivotItemsShown.VB_Description = "Determines if any items are shown in the given pivot field."
     '--- Determines if any items are shown in the given pivot field
     Dim pi As PivotItem
@@ -133,4 +134,15 @@ Attribute PivotItemsShown.VB_Description = "Determines if any items are shown in
         End If
     Next pi
 End Function
+
+Public Sub PivotCollapseAllItems(ByRef thisPivot As PivotTable)
+Attribute PivotCollapseAllItems.VB_Description = "Collapses all rows and items in the given pivot table."
+    PivotSetShowDetail thisPivot, False
+End Sub
+
+Public Sub PivotExpandAllItems(ByRef thisPivot As PivotTable)
+Attribute PivotExpandAllItems.VB_Description = "Expands all rows and items in the given pivot table."
+    PivotSetShowDetail thisPivot, True
+End Sub
+
 
