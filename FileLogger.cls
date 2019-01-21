@@ -7,18 +7,32 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+'@Folder("Libraries")
 Option Explicit
 
-Private Declare Function GetTempPath Lib "kernel32" _
-                         Alias "GetTempPathA" _
-                         (ByVal nBufferLength As Long, _
-                          ByVal lpBuffer As String) As Long
-Private Declare Function GetTempFileName Lib "kernel32" _
-                         Alias "GetTempFileNameA" _
-                         (ByVal lpszPath As String, _
-                          ByVal lpPrefixString As String, _
-                          ByVal wUnique As Long, _
-                          ByVal lpTempFileName As String) As Long
+#If VBA7 Then
+    Private Declare PtrSafe Function GetTempPath Lib "kernel32" _
+                             Alias "GetTempPathA" _
+                             (ByVal nBufferLength As Long, _
+                              ByVal lpBuffer As String) As Long
+    Private Declare PtrSafe Function GetTempFileName Lib "kernel32" _
+                             Alias "GetTempFileNameA" _
+                             (ByVal lpszPath As String, _
+                              ByVal lpPrefixString As String, _
+                              ByVal wUnique As Long, _
+                              ByVal lpTempFileName As String) As Long
+#Else
+    Private Declare Function GetTempPath Lib "kernel32" _
+                             Alias "GetTempPathA" _
+                             (ByVal nBufferLength As Long, _
+                              ByVal lpBuffer As String) As Long
+    Private Declare Function GetTempFileName Lib "kernel32" _
+                             Alias "GetTempFileNameA" _
+                             (ByVal lpszPath As String, _
+                              ByVal lpPrefixString As String, _
+                              ByVal wUnique As Long, _
+                              ByVal lpTempFileName As String) As Long
+#End If
 
 '------------------------------------------------------------------------------
 '  Class Internal Data
@@ -26,6 +40,8 @@ Private Declare Function GetTempFileName Lib "kernel32" _
 Private Type InternalData
     WriteFileOnTermination As Boolean
     TextShouldBeAppended As Boolean
+    AutoAddCrLf As Boolean
+    PrependTimestamp As Boolean
     Filename As String
     Buffer As String
 End Type
@@ -55,6 +71,14 @@ Public Sub ClearBuffer()
     this.Buffer = vbNullString
 End Sub
 
+Public Property Let AutoAddCrLf(ByVal newFlag As Boolean)
+    this.AutoAddCrLf = newFlag
+End Property
+
+Public Property Get AutoAddCrLf() As Boolean
+    AutoAddCrLf = this.AutoAddCrLf
+End Property
+
 Public Property Let WriteFileOnTermination(ByVal newFlag As Boolean)
     this.WriteFileOnTermination = newFlag
 End Property
@@ -63,11 +87,44 @@ Public Property Get WriteFileOnTermination() As Boolean
     WriteFileOnTermination = this.WriteFileOnTermination
 End Property
 
+Public Property Let PrependTimestamp(ByVal newFlag As Boolean)
+    this.PrependTimestamp = newFlag
+End Property
+
+Public Property Get PrependTimestamp() As Boolean
+    PrependTimestamp = this.PrependTimestamp
+End Property
+
 '------------------------------------------------------------------------------
 '  Class Public Methods
 '------------------------------------------------------------------------------
-Public Sub Append(ByVal moreText As String)
-    this.Buffer = this.Buffer & moreText
+Public Sub Append(ByVal moreText As String, _
+                  Optional ByVal AutoAddCrLf As Variant, _
+                  Optional ByVal PrependTimestamp As Variant)
+    '--- the optional parameter is a Boolean and will override the class
+    '    setting if present
+    If Not IsMissing(PrependTimestamp) Then
+        If PrependTimestamp Then
+            this.Buffer = this.Buffer & Format$(Now(), "dd-mmm-yyyy ") & _
+                                  TimeInMS() & ": " & moreText
+        Else
+            this.Buffer = this.Buffer & moreText
+        End If
+    ElseIf this.PrependTimestamp Then
+        this.Buffer = this.Buffer & Format$(Now(), "dd-mmm-yyyy ") & _
+                      TimeInMS() & ": " & moreText
+    Else
+        this.Buffer = this.Buffer & moreText
+    End If
+    
+    '--- the optional parameter overrides the class setting
+    If Not IsMissing(AutoAddCrLf) Then
+        If AutoAddCrLf Then
+            this.Buffer = this.Buffer & vbCrLf
+        End If
+    ElseIf this.AutoAddCrLf Then
+        this.Buffer = this.Buffer & vbCrLf
+    End If
 End Sub
 
 Public Sub WriteToFile()
@@ -125,8 +182,14 @@ End Function
 '------------------------------------------------------------------------------
 '  Class Private Methods
 '------------------------------------------------------------------------------
+Private Function TimeInMS() As String
+    TimeInMS = Format$(Now, "HH:nn:ss") & "." & Right$(Format$(Timer, "#0.00"), 2)
+End Function
+
 Private Sub Class_Initialize()
     this.TextShouldBeAppended = False
+    this.PrependTimestamp = True
+    this.AutoAddCrLf = False
     this.WriteFileOnTermination = True
 End Sub
 
@@ -135,5 +198,7 @@ Private Sub Class_Terminate()
         WriteToFile
     End If
 End Sub
+
+
 
 
