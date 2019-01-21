@@ -1,6 +1,23 @@
 # libvba
 Library of helpful VBA functions and subs for use in any project.
 
+## FileLogger.cls
+This class creates a *persistent static object* (by setting `VB_PredeclaredId = True`) so that logging into a single stream is immediately available to all functions and objects. The object works by holding an internal buffer that the caller can *ClearBuffer*, *Append*, *WriteToFile*, or copy to a local string variable. There are options for automatic tagging each line with a timestamp and appending **CrLf** characters to each line. 
+
+### Public Interface
+#### Properties (Read ONLY)
+ - *none*
+#### Properties (Read/Write)
+ - `WriteFileOnTermination` (**Boolean**, default is `True`) - will cause the internal buffer to be written to the designated file when the object terminates. (Since this is a persistent object, this write action would not happen until the user quits the Excel workbook.)
+ - `PrependTimestamp` (**Boolean**, default is `True`) - will cause a timestamp string in the format "29-Jan-2019 14:01:15.10" to the beginning of each Appended string to the buffer. There is an optional override in the *Append* call.
+ - `AutoAddCrLf` (**Boolean**, default is `False`) - with every call to *Append*, the object will also append a line feed character to force the next appended text to appear on the next line. There is an optional override in the *Append* call.
+ - `Filename` (**String**) - the filename to use when the *WriteToFile* function is called.
+ - `Buffer` (**String**) - allows the caller to directly Set (overwrite) the entire contents of the internal buffer, or to Get the contents of the entire buffer for local examination.
+#### Public Methods
+ - `Sub Append` - accepts String of text and appends it to the internal buffer. Optional override parameters allow the caller to enable/disable the *AutoAddCrLf* and *PrependTimestamp* flags for that one use only.
+ - `Sub WriteToFile` - causes the object to write the contents of its internal buffer to the previously set filename. The filename must be set prior to this call. **The Buffer is NOT cleared automatically after the contents are written.**
+ - `Function CreateTempFileName` - generates a temporary filename in one of the system temporary folders and returns the full path of the filename. It does not open or create the file, only generates the filename. Optional parameters control a potential set prefix for the filename, the file extension, and to set the generated filename as filename to use when the *WriteToFile* method is called.
+
 ## Lib_CalendarSupport
 This module copies functions directly from Craig Pearson's excellent website discussing VBA code, specifically the describing a [Better NetWorkdays](http://www.cpearson.com/excel/betternetworkdays.aspx) function.
 
